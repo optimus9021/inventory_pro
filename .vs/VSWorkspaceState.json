@@ -1,0 +1,13 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\lib",
+    "\\macos",
+    "\\test",
+    "\\web",
+    "\\windows",
+    "\\windows\\flutter"
+  ],
+  "SelectedNode": "\\windows\\CMakeLists.txt",
+  "PreviewInSolutionExplorer": false
+}
