@@ -17,10 +17,12 @@ samples, guidance on mobile development, and a full API reference.
 
 ## Custom Fields
 
-The app allows you to define custom item fields that are saved in Firestore.
+The app allows you to define custom item fields that are persisted locally in
+SQLite. Field metadata is stored in a `fields` table while each item's values
+are kept in an `items` table as JSON for a flexible schema.
 
 1. Open **Field Settings** from the home screen.
 2. Enter a field name and an optional validation regex, then tap **Add Field**.
 3. Open **Add Item** to see a form generated from your saved field definitions.
-4. Submitted item data is stored in the `items` collection using the dynamic
-   keys you configured.
+4. Submitted item data is inserted into the `items` table as a JSON blob
+   containing the dynamic keys you configured.
