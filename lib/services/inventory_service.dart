@@ -10,6 +10,14 @@ class InventoryService {
   final StreamController<List<FieldDefinition>> _controller =
       StreamController.broadcast();
 
+  Stream<List<Map<String, dynamic>>> itemsStream() {
+    return _itemsCollection.snapshots().map((snapshot) {
+      return snapshot.docs
+          .map((doc) => {'id': doc.id, ...doc.data()})
+          .toList();
+    });
+  }
+
   Stream<List<FieldDefinition>> fieldDefinitionsStream() {
     _emitFields();
     return _controller.stream;

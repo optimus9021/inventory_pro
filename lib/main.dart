@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import 'pages/item_form_page.dart';
 import 'pages/settings_page.dart';
 import 'services/database_helper.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:provider/provider.dart';
+import 'pages/dashboard_page.dart';
+import 'providers/inventory_provider.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,42 +21,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Inventory Pro',
-      theme: ThemeData(useMaterial3: true),
-      home: const HomePage(),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Inventory Pro')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ItemFormPage()),
-              ),
-              child: const Text('Add Item'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const SettingsPage()),
-              ),
-              child: const Text('Field Settings'),
-            ),
-          ],
-        ),
+    return ChangeNotifierProvider(
+      create: (_) => InventoryProvider(),
+      child: MaterialApp(
+        title: 'Inventory Pro',
+        theme: ThemeData(useMaterial3: true),
+        home: const DashboardPage(),
       ),
     );
   }
