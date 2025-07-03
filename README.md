@@ -24,3 +24,9 @@ The app allows you to define custom item fields that are saved in Firestore.
 3. Open **Add Item** to see a form generated from your saved field definitions.
 4. Submitted item data is stored in the `items` collection using the dynamic
    keys you configured.
+
+## Dashboard
+
+Launch the app to view the new dashboard which lists saved items and links to
+the item form and field settings. Layouts adapt between narrow and wide screens
+so the app works well on mobile, desktop and web.

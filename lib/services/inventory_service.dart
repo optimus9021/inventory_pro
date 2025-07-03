@@ -12,6 +12,14 @@ class InventoryService {
   CollectionReference<Map<String, dynamic>> get _itemsCollection =>
       _firestore.collection('items');
 
+  Stream<List<Map<String, dynamic>>> itemsStream() {
+    return _itemsCollection.snapshots().map((snapshot) {
+      return snapshot.docs
+          .map((doc) => {'id': doc.id, ...doc.data()})
+          .toList();
+    });
+  }
+
   Stream<List<FieldDefinition>> fieldDefinitionsStream() {
     return _fieldsCollection.snapshots().map((snapshot) {
       return snapshot.docs
