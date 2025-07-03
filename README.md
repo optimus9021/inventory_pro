@@ -17,6 +17,7 @@ samples, guidance on mobile development, and a full API reference.
 
 ## Custom Fields
 
+The app allows you to define custom item fields that are stored locally using SQLite.
 The app allows you to define custom item fields that are persisted locally in
 SQLite. Field metadata is stored in a `fields` table while each item's values
 are kept in an `items` table as JSON for a flexible schema.

@@ -12,7 +12,8 @@ class ItemFormPage extends StatefulWidget {
 
 class _ItemFormPageState extends State<ItemFormPage> {
   final _formKey = GlobalKey<FormState>();
-  final _controllers = <String, TextEditingController>{};
+  final _controllers = <int, TextEditingController>{};
+  final InventoryService _service = InventoryService();
 
   @override
   void dispose() {
@@ -36,49 +37,49 @@ class _ItemFormPageState extends State<ItemFormPage> {
           if (fields.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
-          final isWide = constraints.maxWidth > 600;
-          return Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: isWide ? 600 : double.infinity),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Form(
-                  key: _formKey,
-                  child: ListView(
-                    children: [
-                      ...fields.map((field) {
-                        final controller = _controllers[field.id]!;
-                        return TextFormField(
-                          controller: controller,
-                          decoration: InputDecoration(labelText: field.name),
-                          validator: (value) {
-                            if (field.pattern != null && value != null) {
-                              final reg = RegExp(field.pattern!);
-                              if (!reg.hasMatch(value)) {
-                                return 'Invalid ${field.name}';
-                              }
-                            }
-                            if (value == null || value.isEmpty) {
-                              return 'Required';
-                            }
-                            return null;
-                          },
-                        );
-                      }),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            final data = {
-                              for (final field in fields)
-                                field.name: _controllers[field.id]!.text,
-                            };
-                            provider.addItem(data).then((_) => Navigator.pop(context));
+          final fields = snapshot.data!;
+          for (final field in fields) {
+            if (field.id != null) {
+              _controllers.putIfAbsent(field.id!, () => TextEditingController());
+            }
+          }
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                children: [
+                  ...fields.map((field) {
+                    final controller = _controllers[field.id!]!;
+                    return TextFormField(
+                      controller: controller,
+                      decoration: InputDecoration(labelText: field.name),
+                      validator: (value) {
+                        if (field.pattern != null && value != null) {
+                          final reg = RegExp(field.pattern!);
+                          if (!reg.hasMatch(value)) {
+                            return 'Invalid ${field.name}';
                           }
-                        },
-                        child: const Text('Save'),
-                      ),
-                    ],
+                        }
+                        if (value == null || value.isEmpty) {
+                          return 'Required';
+                        }
+                        return null;
+                      },
+                    );
+                  }),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        final data = {
+                          for (final field in fields)
+                            field.name: _controllers[field.id!]!.text,
+                        };
+                        _service.saveItem(data).then((_) => Navigator.pop(context));
+                      }
+                    },
+                    child: const Text('Save'),
                   ),
                 ),
               ),

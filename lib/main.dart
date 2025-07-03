@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'services/inventory_service.dart';
+
 import 'pages/item_form_page.dart';
 import 'pages/settings_page.dart';
 import 'services/database_helper.dart';
@@ -12,7 +14,11 @@ import 'providers/inventory_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await InventoryService().init();
+
   await DatabaseHelper.instance.init();
+
   runApp(const MyApp());
 }
 
