@@ -5,9 +5,9 @@ class FieldDefinition {
 
   FieldDefinition({required this.id, required this.name, this.pattern});
 
-  factory FieldDefinition.fromMap(String id, Map<String, dynamic> data) {
+  factory FieldDefinition.fromMap(Map<String, Object?> data) {
     return FieldDefinition(
-      id: id,
+      id: data['id'].toString(),
       name: data['name'] as String,
       pattern: data['pattern'] as String?,
     );

@@ -1,16 +1,14 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:sqflite/sqflite.dart';
+
 import '../models/field_definition.dart';
+import 'database_helper.dart';
 
 class InventoryService {
-  final FirebaseFirestore _firestore;
-  InventoryService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
-
-  CollectionReference<Map<String, dynamic>> get _fieldsCollection =>
-      _firestore.collection('field_definitions');
-
-  CollectionReference<Map<String, dynamic>> get _itemsCollection =>
-      _firestore.collection('items');
+  final StreamController<List<FieldDefinition>> _controller =
+      StreamController.broadcast();
 
   Stream<List<Map<String, dynamic>>> itemsStream() {
     return _itemsCollection.snapshots().map((snapshot) {
@@ -21,18 +19,27 @@ class InventoryService {
   }
 
   Stream<List<FieldDefinition>> fieldDefinitionsStream() {
-    return _fieldsCollection.snapshots().map((snapshot) {
-      return snapshot.docs
-          .map((doc) => FieldDefinition.fromMap(doc.id, doc.data()))
-          .toList();
-    });
+    _emitFields();
+    return _controller.stream;
   }
 
-  Future<void> addFieldDefinition(FieldDefinition field) {
-    return _fieldsCollection.add(field.toMap());
+  Future<Database> get _db async => DatabaseHelper.instance.database;
+
+  Future<void> _emitFields() async {
+    final db = await _db;
+    final maps = await db.query('fields');
+    final fields = maps.map(FieldDefinition.fromMap).toList();
+    _controller.add(fields);
   }
 
-  Future<void> saveItem(Map<String, dynamic> data) {
-    return _itemsCollection.add(data);
+  Future<void> addFieldDefinition(FieldDefinition field) async {
+    final db = await _db;
+    await db.insert('fields', field.toMap());
+    await _emitFields();
+  }
+
+  Future<void> saveItem(Map<String, dynamic> data) async {
+    final db = await _db;
+    await db.insert('items', {'data': jsonEncode(data)});
   }
 }
