@@ -1,30 +1,41 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
+import 'dart:convert';
+
 import '../models/field_definition.dart';
+import 'db_service.dart';
 
 class InventoryService {
-  final FirebaseFirestore _firestore;
-  InventoryService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+  InventoryService._();
+  static final InventoryService _instance = InventoryService._();
+  factory InventoryService() => _instance;
 
-  CollectionReference<Map<String, dynamic>> get _fieldsCollection =>
-      _firestore.collection('field_definitions');
+  final DbService _db = DbService();
+  final StreamController<List<FieldDefinition>> _fieldsController =
+      StreamController<List<FieldDefinition>>.broadcast();
 
-  CollectionReference<Map<String, dynamic>> get _itemsCollection =>
-      _firestore.collection('items');
-
-  Stream<List<FieldDefinition>> fieldDefinitionsStream() {
-    return _fieldsCollection.snapshots().map((snapshot) {
-      return snapshot.docs
-          .map((doc) => FieldDefinition.fromMap(doc.id, doc.data()))
-          .toList();
-    });
+  Future<void> init() async {
+    await _db.init();
+    await _loadFields();
   }
 
-  Future<void> addFieldDefinition(FieldDefinition field) {
-    return _fieldsCollection.add(field.toMap());
+  Stream<List<FieldDefinition>> fieldDefinitionsStream() =>
+      _fieldsController.stream;
+
+  Future<void> _loadFields() async {
+    final db = await _db.database;
+    final maps = await db.query('field_definitions');
+    final fields = maps.map(FieldDefinition.fromMap).toList();
+    _fieldsController.add(fields);
   }
 
-  Future<void> saveItem(Map<String, dynamic> data) {
-    return _itemsCollection.add(data);
+  Future<void> addFieldDefinition(FieldDefinition field) async {
+    final db = await _db.database;
+    await db.insert('field_definitions', field.toMap());
+    await _loadFields();
+  }
+
+  Future<void> saveItem(Map<String, dynamic> data) async {
+    final db = await _db.database;
+    await db.insert('items', {'data': jsonEncode(data)});
   }
 }

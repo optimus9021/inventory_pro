@@ -11,7 +11,7 @@ class ItemFormPage extends StatefulWidget {
 
 class _ItemFormPageState extends State<ItemFormPage> {
   final _formKey = GlobalKey<FormState>();
-  final _controllers = <String, TextEditingController>{};
+  final _controllers = <int, TextEditingController>{};
   final InventoryService _service = InventoryService();
 
   @override
@@ -34,7 +34,9 @@ class _ItemFormPageState extends State<ItemFormPage> {
           }
           final fields = snapshot.data!;
           for (final field in fields) {
-            _controllers.putIfAbsent(field.id, () => TextEditingController());
+            if (field.id != null) {
+              _controllers.putIfAbsent(field.id!, () => TextEditingController());
+            }
           }
           return Padding(
             padding: const EdgeInsets.all(16),
@@ -43,7 +45,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
               child: ListView(
                 children: [
                   ...fields.map((field) {
-                    final controller = _controllers[field.id]!;
+                    final controller = _controllers[field.id!]!;
                     return TextFormField(
                       controller: controller,
                       decoration: InputDecoration(labelText: field.name),
@@ -67,7 +69,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
                       if (_formKey.currentState!.validate()) {
                         final data = {
                           for (final field in fields)
-                            field.name: _controllers[field.id]!.text,
+                            field.name: _controllers[field.id!]!.text,
                         };
                         _service.saveItem(data).then((_) => Navigator.pop(context));
                       }

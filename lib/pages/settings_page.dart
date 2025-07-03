@@ -49,7 +49,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 _service
                     .addFieldDefinition(
                       FieldDefinition(
-                        id: '',
                         name: name,
                         pattern: pattern.isEmpty ? null : pattern,
                       ),
