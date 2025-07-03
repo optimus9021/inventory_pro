@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../services/inventory_service.dart';
+import 'package:provider/provider.dart';
 import '../models/field_definition.dart';
+import '../providers/inventory_provider.dart';
 
 class ItemFormPage extends StatefulWidget {
   const ItemFormPage({super.key});
@@ -24,12 +25,16 @@ class _ItemFormPageState extends State<ItemFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<InventoryProvider>();
+    final fields = provider.fields;
+    for (final field in fields) {
+      _controllers.putIfAbsent(field.id, () => TextEditingController());
+    }
     return Scaffold(
       appBar: AppBar(title: const Text('Add Item')),
-      body: StreamBuilder<List<FieldDefinition>>(
-        stream: _service.fieldDefinitionsStream(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          if (fields.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
           final fields = snapshot.data!;
@@ -76,7 +81,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
                     },
                     child: const Text('Save'),
                   ),
-                ],
+                ),
               ),
             ),
           );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../services/inventory_service.dart';
+import 'package:provider/provider.dart';
 import '../models/field_definition.dart';
+import '../providers/inventory_provider.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -12,7 +13,6 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   final _nameController = TextEditingController();
   final _patternController = TextEditingController();
-  final InventoryService _service = InventoryService();
 
   @override
   void dispose() {
@@ -25,9 +25,16 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Field Settings')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth > 600;
+          return Center(
+            child: ConstrainedBox(
+              constraints:
+                  BoxConstraints(maxWidth: isWide ? 600 : double.infinity),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
@@ -43,11 +50,12 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
+                final provider = context.read<InventoryProvider>();
                 final name = _nameController.text.trim();
                 final pattern = _patternController.text.trim();
                 if (name.isEmpty) return;
-                _service
-                    .addFieldDefinition(
+                provider
+                    .addField(
                       FieldDefinition(
                         name: name,
                         pattern: pattern.isEmpty ? null : pattern,
@@ -62,23 +70,25 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             const SizedBox(height: 24),
             Expanded(
-              child: StreamBuilder<List<FieldDefinition>>(
-                stream: _service.fieldDefinitionsStream(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
+              child: Consumer<InventoryProvider>(
+                builder: (context, provider, _) {
+                  final fields = provider.fields;
+                  if (fields.isEmpty) {
                     return const Center(child: CircularProgressIndicator());
                   }
-                  final fields = snapshot.data!;
                   return ListView(
-                    children: fields
-                        .map((f) => ListTile(title: Text(f.name)))
-                        .toList(),
+                    children:
+                        fields.map((f) => ListTile(title: Text(f.name))).toList(),
                   );
                 },
               ),
             ),
           ],
         ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
